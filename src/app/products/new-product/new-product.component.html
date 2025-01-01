@@ -8,31 +8,78 @@
       (click)="modal.dismiss('Cross click')"
     ></button>
   </div>
-  <div class="modal-body">
-    <form [formGroup]="form">
+  <form
+    class="needs-validation"
+    #newProductForm="ngForm"
+    (ngSubmit)="createProduct()"
+  >
+    <div class="modal-body">
       <div class="form-group">
         <label for="name">Name</label>
-        <input id="name" class="form-control" formControlName="name" />
+        <div class="input-group has-validation">
+          <input
+            id="name"
+            class="form-control"
+            ngModel
+            required
+            #name="ngModel"
+            name="name"
+            maxlength="255"
+          />
+        </div>
+        @if(name.touched && name.invalid){
+        <div>
+          <p class="lp-control-error">
+            Name is required and must be less than 256 characters
+          </p>
+        </div>
+        }
+
         <label for="description">Description</label>
-        <input
-          id="description"
-          class="form-control"
-          formControlName="description"
-        />
+        <div class="input-group has-validation">
+          <input
+            id="description"
+            class="form-control"
+            ngModel
+            name="description"
+            required
+            #description="ngModel"
+            maxlength="255"
+          />
+        </div>
+        @if(description.touched && description.invalid){
+        <div>
+          <p class="lp-control-error">
+            Description is required and must be less than 256 characters
+          </p>
+        </div>
+        }
         <label for="price">Price</label>
-        <input id="price" class="form-control" formControlName="price" />
+        <div class="input-group has-validation">
+          <input
+            id="price"
+            class="form-control"
+            ngModel
+            name="price"
+            required
+            maxlength="255"
+          />
+        </div>
         <label for="quantity">Quantity</label>
-        <input id="quantity" class="form-control" formControlName="quantity" />
+        <div class="input-group has-validation">
+          <input
+            id="quantity"
+            class="form-control"
+            ngModel
+            name="quantity"
+            required
+            maxlength="255"
+          />
+        </div>
       </div>
-    </form>
-  </div>
-  <div class="modal-footer">
-    <button
-      type="button"
-      class="btn btn-outline-secondary"
-      (click)="modal.close('Save click')"
-    >
-      Save
-    </button>
-  </div>
+    </div>
+    <div class="modal-footer">
+      <button type="submit" class="btn btn-outline-secondary">Submit</button>
+    </div>
+  </form>
 </ng-template>
