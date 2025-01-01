@@ -1,11 +1,10 @@
-import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { Product } from '../product/product.model';
 import { ProductService } from '../product/product.service';
 import { UUID } from 'angular2-uuid';
 import { Router } from '@angular/router';
 import {
   Component,
-  inject,
   OnInit,
   signal,
   TemplateRef,
@@ -21,20 +20,17 @@ import {
 
 @Component({
   selector: 'app-new-product',
-  imports: [ReactiveFormsModule],
+  imports: [FormsModule],
   templateUrl: './new-product.component.html',
   styleUrl: './new-product.component.css',
 })
 export class NewProductComponent implements OnInit {
   modal = viewChild.required<TemplateRef<any>>('content');
   closeResult: WritableSignal<string> = signal('');
-
-  form = new FormGroup({
-    name: new FormControl(''),
-    description: new FormControl(''),
-    price: new FormControl(''),
-    quantity: new FormControl(''),
-  });
+  serverErrorMessage: string =
+    'Error occured while trying to contact server. Please contact customer support.';
+  serverError = signal<string>('');
+  newProductForm = viewChild.required<NgForm>('newProductForm');
 
   constructor(
     private modalService: NgbModal,
@@ -43,10 +39,10 @@ export class NewProductComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.open(this.modal());
+    this.openModal(this.modal());
   }
 
-  open(content: TemplateRef<any>) {
+  openModal(content: TemplateRef<any>) {
     this.modalService
       .open(content, { ariaLabelledBy: 'modal-basic-title' })
       .result.then(
@@ -62,16 +58,30 @@ export class NewProductComponent implements OnInit {
   }
 
   createProduct() {
-    console.log('form submitted');
+    if (this.newProductForm().form.invalid) {
+      return;
+    }
+
+    console.log(this.newProductForm().form);
     const product: Product = {
       id: UUID.UUID(),
-      name: this.form.value.name || '',
-      description: this.form.value.description || '',
-      price: this.form.value.price || '',
-      quantity: parseInt(this.form.value.quantity || '0', 10),
+      name: this.newProductForm().value.name || '',
+      description: this.newProductForm().value.description || '',
+      price: this.newProductForm().value.price || '',
+      quantity: parseInt(this.newProductForm().value.quantity || '0', 10),
     };
     const sub = this.productService.createProduct(product).subscribe({
-      next: (val) => console.log(val),
+      next: (val) => {
+        this.serverError.set('');
+        this.modalService.dismissAll('save-click');
+        this.productService.products.update((oldProducts) => [
+          ...oldProducts,
+          product,
+        ]);
+      },
+      error: (err) => {
+        this.serverError.set(this.serverErrorMessage);
+      },
     });
     this.productService.closeConnection(sub);
   }

@@ -1,8 +1,13 @@
 Template
-  - change new product to template based form
+  - merge with newest branch
+  - remove control references (not needed)
 
 Impl Validation
 - validate fields for create (template) / do error stlying
+- do on submit 
+  - if it does not validate, return
+  - if it does validate, run modalService.close
+
 - validate fields for update (reactive) / do error stlying
 
 
